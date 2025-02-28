@@ -1,83 +1,74 @@
 import React, { useState } from "react";
-import "./App.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const App = () => {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
   const [editingIndex, setEditingIndex] = useState(null);
-  const [editedTask, setEditedTask] = useState("");
 
   const addTask = () => {
-    if (newTask.trim() !== "") {
-      setTasks([...tasks, { text: newTask, completed: false }]);
-      setNewTask("");
+    if (newTask.trim() === "") {
+      alert("Please enter a task!");
+      return;
     }
-  };
 
-  const toggleTask = (index) => {
-    const updatedTasks = [...tasks];
-    updatedTasks[index].completed = !updatedTasks[index].completed;
-    setTasks(updatedTasks);
+    if (editingIndex !== null) {
+      const updatedTasks = [...tasks];
+      updatedTasks[editingIndex] = newTask;
+      setTasks(updatedTasks);
+      setEditingIndex(null);
+    } else {
+      setTasks([...tasks, newTask]);
+    }
+
+    setNewTask("");
   };
 
   const deleteTask = (index) => {
-    setTasks(tasks.filter((_, i) => i !== index));
+    const updatedTasks = tasks.filter((_, i) => i !== index);
+    setTasks(updatedTasks);
   };
 
-  const startEditing = (index) => {
+  const editTask = (index) => {
+    setNewTask(tasks[index]);
     setEditingIndex(index);
-    setEditedTask(tasks[index].text);
-  };
-
-  const updateTask = () => {
-    if (editedTask.trim() !== "") {
-      const updatedTasks = [...tasks];
-      updatedTasks[editingIndex].text = editedTask;
-      setTasks(updatedTasks);
-      setEditingIndex(null);
-      setEditedTask("");
-    }
   };
 
   return (
-    <div className="app">
-      <h1>📝 To-Do List</h1>
-      <div className="input-container">
-        <input
-          type="text"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-          placeholder="Enter a task..."
-        />
-        <button onClick={addTask}>Add</button>
-      </div>
-
-      <ul>
-        {tasks.map((task, index) => (
-          <li key={index} className={task.completed ? "completed" : ""}>
-            {editingIndex === index ? (
-              <div className="edit-container">
-                <input
-                  type="text"
-                  value={editedTask}
-                  onChange={(e) => setEditedTask(e.target.value)}
-                />
-                <button onClick={updateTask}>✔</button>
+    <div className="container d-flex justify-content-center align-items-center vh-100">
+      <div className="card p-4 shadow-lg" style={{ width: "400px" }}>
+        <h3 className="text-center mb-3">📌 To-Do List</h3>
+        <div className="input-group mb-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Enter a task..."
+            value={newTask}
+            onChange={(e) => setNewTask(e.target.value)}
+          />
+          <button className="btn btn-success" onClick={addTask}>
+            {editingIndex !== null ? "Update" : "Add"}
+          </button>
+        </div>
+        <ul className="list-group">
+          {tasks.map((task, index) => (
+            <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+              <span>{task}</span>
+              <div>
+                <button className="btn btn-warning btn-sm me-2" onClick={() => editTask(index)}>
+                  ✏️
+                </button>
+                <button className="btn btn-danger btn-sm" onClick={() => deleteTask(index)}>
+                  ❌
+                </button>
               </div>
-            ) : (
-              <>
-                <span onClick={() => toggleTask(index)}>{task.text}</span>
-                <div>
-                  <button className="edit-btn" onClick={() => startEditing(index)}>✏</button>
-                  <button className="delete-btn" onClick={() => deleteTask(index)}>❌</button>
-                </div>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };
 
 export default App;
+
